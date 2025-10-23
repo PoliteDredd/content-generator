@@ -37,18 +37,54 @@ serve(async (req) => {
       Generate a compelling paragraph that achieves the goal while maintaining the specified tone.`;
     } 
     else if (type === 'image') {
-      systemPrompt = `You are an expert at creating detailed image generation prompts for AI art tools.
-      Generate descriptive, vivid prompts that include style, lighting, composition, and technical details.
-      Structure the prompt to be clear and actionable for image generation models.`;
+      // Build a comprehensive image generation prompt
+      const imagePrompt = `Create a ${params.style} image of ${params.subject}. Lighting: ${params.lighting}. Composition: ${params.composition}.`;
       
-      userPrompt = `Create a detailed image generation prompt with these specifications:
-      Subject: ${params.subject}
-      Style: ${params.style}
-      Lighting: ${params.lighting}
-      Composition: ${params.composition}
+      // Call Lovable AI Gateway with image generation model
+      const imageResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash-image-preview",
+          messages: [
+            { role: "user", content: imagePrompt }
+          ],
+          modalities: ["image", "text"]
+        }),
+      });
+
+      if (!imageResponse.ok) {
+        if (imageResponse.status === 429) {
+          return new Response(
+            JSON.stringify({ error: "Rate limit exceeded. Please try again later." }), 
+            { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        if (imageResponse.status === 402) {
+          return new Response(
+            JSON.stringify({ error: "Payment required. Please add credits to your workspace." }), 
+            { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        const errorText = await imageResponse.text();
+        console.error("AI gateway error:", imageResponse.status, errorText);
+        throw new Error("AI gateway error");
+      }
+
+      const imageData = await imageResponse.json();
+      const generatedImage = imageData.choices[0].message.images?.[0]?.image_url?.url;
       
-      Generate a comprehensive prompt that an AI image generator can use to create a high-quality image.
-      Include details about colors, mood, perspective, and technical aspects.`;
+      if (!generatedImage) {
+        throw new Error("No image generated");
+      }
+
+      return new Response(
+        JSON.stringify({ content: generatedImage, isImage: true }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
     else if (type === 'code') {
       systemPrompt = `You are an expert programmer who writes clean, functional, well-documented code.

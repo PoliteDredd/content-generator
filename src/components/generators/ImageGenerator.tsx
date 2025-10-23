@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
-import { Loader2, Copy, Check } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -16,7 +16,6 @@ const ImageGenerator = () => {
   const [composition, setComposition] = useState("");
   const [output, setOutput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [copied, setCopied] = useState(false);
 
   const handleGenerate = async () => {
     if (!subject.trim()) {
@@ -40,20 +39,13 @@ const ImageGenerator = () => {
 
       if (error) throw error;
       setOutput(data.content);
-      toast.success("Image prompt generated successfully!");
+      toast.success("Image generated successfully!");
     } catch (error: any) {
       console.error('Generation error:', error);
-      toast.error(error.message || "Failed to generate image prompt");
+      toast.error(error.message || "Failed to generate image");
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(output);
-    setCopied(true);
-    toast.success("Copied to clipboard!");
-    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -122,28 +114,19 @@ const ImageGenerator = () => {
               Generating...
             </>
           ) : (
-            "Generate Image Prompt"
+            "Generate Image"
           )}
         </Button>
       </div>
 
       {output && (
-        <Card className="p-4 bg-muted/50 border-border/50 relative">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute top-2 right-2"
-            onClick={handleCopy}
-          >
-            {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-          </Button>
-          <div className="pr-12">
-            <p className="text-sm font-medium text-muted-foreground mb-2">Generated Image Prompt:</p>
-            <p className="whitespace-pre-wrap text-foreground">{output}</p>
-            <p className="text-xs text-muted-foreground mt-4 pt-4 border-t border-border">
-              Use this prompt with AI image generation tools like Midjourney, DALL-E, or Stable Diffusion
-            </p>
-          </div>
+        <Card className="p-4 bg-muted/50 border-border/50">
+          <p className="text-sm font-medium text-muted-foreground mb-4">Generated Image:</p>
+          <img 
+            src={output} 
+            alt="Generated content" 
+            className="w-full rounded-lg shadow-lg"
+          />
         </Card>
       )}
     </div>
