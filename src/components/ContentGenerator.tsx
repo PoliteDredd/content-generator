@@ -1,10 +1,10 @@
-import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
-import { Sparkles, Image, Code } from "lucide-react";
+import { Sparkles, Image, Code, Video } from "lucide-react";
 import TextGenerator from "./generators/TextGenerator";
 import ImageGenerator from "./generators/ImageGenerator";
 import CodeGenerator from "./generators/CodeGenerator";
+import VideoGenerator from "./generators/VideoGenerator";
 
 const ContentGenerator = () => {
   return (
@@ -20,7 +20,7 @@ const ContentGenerator = () => {
             Custom Content Generator
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Generate text, images, and code automatically with structured prompts and consistent outputs
+            Generate text, images, code, and videos automatically with structured prompts and consistent outputs
           </p>
         </div>
 
@@ -50,6 +50,13 @@ const ContentGenerator = () => {
                   <Code className="w-4 h-4" />
                   Code Generation
                 </TabsTrigger>
+                <TabsTrigger 
+                  value="video" 
+                  className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-6 py-4 gap-2"
+                >
+                  <Video className="w-4 h-4" />
+                  Video Generator
+                </TabsTrigger>
               </TabsList>
             </div>
 
@@ -64,6 +71,10 @@ const ContentGenerator = () => {
 
               <TabsContent value="code" className="mt-0">
                 <CodeGenerator />
+              </TabsContent>
+
+              <TabsContent value="video" className="mt-0">
+                <VideoGenerator />
               </TabsContent>
             </div>
           </Tabs>
